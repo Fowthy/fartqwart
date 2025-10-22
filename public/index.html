@@ -289,6 +289,127 @@
                 </div>
             </div>
 
+            <!-- Performance & JVM Stats -->
+            <div class="grid">
+                <div class="card">
+                    <h2>📊 Tick Performance (MSPT)</h2>
+                    <div class="stat-row">
+                        <span class="stat-label">Min</span>
+                        <span class="stat-value" id="msptMin">-- ms</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Mean</span>
+                        <span class="stat-value" id="msptMean">-- ms</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Max (Lag Spike)</span>
+                        <span class="stat-value" id="msptMax">-- ms</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🧵 JVM Threads</h2>
+                    <div class="stat-row">
+                        <span class="stat-label">Current / Peak</span>
+                        <span class="stat-value" id="threadsCount">-- / --</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Deadlocked ⚠️</span>
+                        <span class="stat-value" id="threadsDeadlocked">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Runnable / Waiting</span>
+                        <span class="stat-value" id="threadsStates">-- / --</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🗑️ Garbage Collection</h2>
+                    <div class="stat-row">
+                        <span class="stat-label">Total Collections</span>
+                        <span class="stat-value" id="gcTotalCount">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Total GC Time</span>
+                        <span class="stat-value" id="gcTotalTime">-- s</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Young Gen / Old Gen</span>
+                        <span class="stat-value" id="gcBreakdown">-- / --</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📁 File Descriptors</h2>
+                    <div class="stat-row">
+                        <span class="stat-label">Open / Max</span>
+                        <span class="stat-value" id="fdsCount">-- / --</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Usage</span>
+                        <span class="stat-value" id="fdsPercent">--%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="fdsProgress" style="width: 0%">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dimension Stats -->
+            <div class="grid">
+                <div class="card">
+                    <h2>🌍 Overworld</h2>
+                    <div class="stat-row">
+                        <span class="stat-label">Players</span>
+                        <span class="stat-value" id="dimOverworldPlayers">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Loaded Chunks</span>
+                        <span class="stat-value" id="dimOverworldChunks">--</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🔥 Nether</h2>
+                    <div class="stat-row">
+                        <span class="stat-label">Players</span>
+                        <span class="stat-value" id="dimNetherPlayers">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Loaded Chunks</span>
+                        <span class="stat-value" id="dimNetherChunks">--</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🌌 The End</h2>
+                    <div class="stat-row">
+                        <span class="stat-label">Players</span>
+                        <span class="stat-value" id="dimEndPlayers">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Loaded Chunks</span>
+                        <span class="stat-value" id="dimEndChunks">--</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🔌 Connections</h2>
+                    <div class="stat-row">
+                        <span class="stat-label">Status Pings</span>
+                        <span class="stat-value" id="connectionPings">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Logins</span>
+                        <span class="stat-value" id="connectionLogins">--</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">JVM Classes Loaded</span>
+                        <span class="stat-value" id="jvmClasses">--</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- System Stats -->
             <div class="grid">
                 <div class="card">
@@ -425,6 +546,54 @@
                     // World
                     document.getElementById('chunks').textContent = data.minecraft.world.chunks.toLocaleString();
                     document.getElementById('entities').textContent = data.minecraft.world.entities.toLocaleString();
+
+                    // Performance - MSPT
+                    document.getElementById('msptMin').textContent = data.minecraft.performance.mspt.min.toFixed(2) + ' ms';
+                    document.getElementById('msptMean').textContent = data.minecraft.performance.mspt.mean.toFixed(2) + ' ms';
+                    document.getElementById('msptMax').textContent = data.minecraft.performance.mspt.max.toFixed(2) + ' ms';
+
+                    // JVM Threads
+                    document.getElementById('threadsCount').textContent =
+                        `${data.minecraft.jvm.threads.current} / ${data.minecraft.jvm.threads.peak}`;
+                    document.getElementById('threadsDeadlocked').textContent = data.minecraft.jvm.threads.deadlocked;
+                    document.getElementById('threadsStates').textContent =
+                        `${data.minecraft.jvm.threads.states.runnable} / ${data.minecraft.jvm.threads.states.waiting}`;
+
+                    // Highlight deadlocked threads if > 0
+                    const deadlockedElement = document.getElementById('threadsDeadlocked');
+                    if (data.minecraft.jvm.threads.deadlocked > 0) {
+                        deadlockedElement.style.color = '#ef4444';
+                        deadlockedElement.style.fontWeight = 'bold';
+                    } else {
+                        deadlockedElement.style.color = '#10b981';
+                    }
+
+                    // Garbage Collection
+                    document.getElementById('gcTotalCount').textContent = data.minecraft.jvm.gc.totalCollections.toLocaleString();
+                    document.getElementById('gcTotalTime').textContent = data.minecraft.jvm.gc.totalTimeSeconds + ' s';
+                    document.getElementById('gcBreakdown').textContent =
+                        `${data.minecraft.jvm.gc.youngGen.collections} / ${data.minecraft.jvm.gc.oldGen.collections}`;
+
+                    // File Descriptors
+                    document.getElementById('fdsCount').textContent =
+                        `${data.minecraft.system.fileDescriptors.open.toLocaleString()} / ${data.minecraft.system.fileDescriptors.max.toLocaleString()}`;
+                    document.getElementById('fdsPercent').textContent = data.minecraft.system.fileDescriptors.percentUsed + '%';
+                    updateProgressBar('fdsProgress', parseFloat(data.minecraft.system.fileDescriptors.percentUsed));
+
+                    // Dimensions
+                    document.getElementById('dimOverworldPlayers').textContent = data.minecraft.dimensions.overworld.players;
+                    document.getElementById('dimOverworldChunks').textContent = data.minecraft.dimensions.overworld.chunks.toLocaleString();
+
+                    document.getElementById('dimNetherPlayers').textContent = data.minecraft.dimensions.nether.players;
+                    document.getElementById('dimNetherChunks').textContent = data.minecraft.dimensions.nether.chunks.toLocaleString();
+
+                    document.getElementById('dimEndPlayers').textContent = data.minecraft.dimensions.end.players;
+                    document.getElementById('dimEndChunks').textContent = data.minecraft.dimensions.end.chunks.toLocaleString();
+
+                    // Connections & Classes
+                    document.getElementById('connectionPings').textContent = data.minecraft.connections.statusPings.toLocaleString();
+                    document.getElementById('connectionLogins').textContent = data.minecraft.connections.logins.toLocaleString();
+                    document.getElementById('jvmClasses').textContent = data.minecraft.jvm.classesLoaded.toLocaleString();
 
                     // Raw metrics
                     const rawMetrics = document.getElementById('rawMetrics');
